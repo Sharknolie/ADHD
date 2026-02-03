@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理问题</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>问题管理</h1>
+
+        <!-- 添加新问题 -->
+        <div class="add-question">
+            <input type="text" id="new-question" placeholder="输入新问题，如：喝水了吗？">
+            <button id="btn-add" class="btn btn-yes">添加</button>
+        </div>
+
+        <!-- 问题列表 -->
+        <ul id="question-list"></ul>
+
+        <!-- 返回 -->
+        <nav>
+            <a href="index.html">状态检查</a>
+            <a href="tasks.html">任务管理</a>
+            <a href="lottery.html">抽奖</a>
+            <a href="customize_reward.html">自定义奖品</a>
+            <a href="login.html">登录</a>
+        </nav>
+    </div>
+
+    <script src="api.js"></script>
+    <script src="manage.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - ADHD Helper</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Welcome Page Specific Styles */
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            /* Prevent scrolling if possible */
+        }
+
+        .welcome-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: #000;
+            /* Ensure pure black background */
+        }
+
+        .hero-text {
+            font-size: 5rem;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 60px;
+            letter-spacing: -2px;
+            text-transform: capitalize;
+            /* Or none if we want exact casing */
+            /* Optional: Add a subtle gradient or shadow */
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            line-height: 1.1;
+        }
+
+        .nav-options {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .nav-options a {
+            color: #888;
+            text-decoration: none;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 2px solid transparent;
+            padding-bottom: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-options a:hover {
+            color: #fff;
+            border-bottom-color: #fff;
+            transform: translateY(-2px);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .hero-text {
+                font-size: 3rem;
+            }
+
+            .nav-options {
+                gap: 20px;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="welcome-container">
+        <h1 class="hero-text">Make life<br>easier<span style="margin-left: 0.15em;">!</span></h1>
+
+        <div class="nav-options">
+            <a href="index.html">状态检查</a>
+            <a href="tasks.html">任务管理</a>
+            <a href="manage.html">管理问题</a>
+            <a href="lottery.html">抽奖</a>
+            <a href="customize_reward.html">自定义奖品</a>
+        </div>
+    </div>
+</body>
+
+</html>

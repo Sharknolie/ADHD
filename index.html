@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADHD 能量检查</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>状态检查</h1>
+
+        <!-- 问题显示区域 -->
+        <div id="question-area">
+            <p id="question-text">加载中...</p>
+
+            <!-- 两个按钮：钩和叉 -->
+            <div class="buttons">
+                <button id="btn-yes" class="btn btn-yes">✓</button>
+                <button id="btn-no" class="btn btn-no">✗</button>
+            </div>
+        </div>
+
+        <!-- 不适反馈区域（默认隐藏） -->
+        <div id="feedback-area" class="hidden">
+            <label>哪里不适？</label>
+            <textarea id="discomfort" placeholder="描述你的感受..."></textarea>
+
+            <label>要采取什么行动？</label>
+            <textarea id="action" placeholder="我要去..."></textarea>
+
+            <button id="btn-confirm" class="btn btn-confirm">完成行动，继续</button>
+        </div>
+
+        <!-- 完成提示 -->
+        <div id="complete-area" class="hidden">
+            <h2>全部检查完成！</h2>
+            <button id="btn-restart" class="btn">重新开始</button>
+        </div>
+
+        <!-- 底部导航 -->
+        <nav>
+            <a href="manage.html">管理问题</a>
+            <a href="tasks.html">任务管理</a>
+            <a href="lottery.html">抽奖</a>
+            <a href="customize_reward.html">自定义奖品</a>
+            <a href="login.html">登录</a>
+        </nav>
+    </div>
+
+    <script src="api.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

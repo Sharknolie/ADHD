@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>JS 和 DOM 的关系</title>
+</head>
+<body>
+
+    <!-- ========== 这是 DOM ========== -->
+    <!-- DOM 就是这些 HTML 元素在浏览器内存里的表示 -->
+
+    <h1 id="title">我是标题</h1>
+    <p id="content">我是一段文字</p>
+    <button id="btn">点我试试</button>
+
+    <!-- ========== 这是 JS ========== -->
+    <script>
+        // JS 是编程语言，用来写逻辑
+
+        // 第一步：用 JS 去"找到" DOM 元素
+        let title = document.getElementById('title');
+        let content = document.getElementById('content');
+        let btn = document.getElementById('btn');
+
+        // 第二步：用 JS 去"操作" DOM 元素
+        btn.addEventListener('click', function() {
+            // 当按钮被点击时，修改 DOM
+            title.textContent = '标题被我改了！';
+            content.textContent = '文字也被我改了！';
+            title.style.color = 'red';
+        });
+    </script>
+
+</body>
+</html>

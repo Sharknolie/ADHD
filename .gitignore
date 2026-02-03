@@ -1,0 +1,19 @@
+# Root
+.DS_Store
+Thumbs.db
+*.log
+*.err
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Node
+node_modules/
+
+# Java / Maven
+backend/target/
+
+# Local config
+backend/src/main/resources/application.yml

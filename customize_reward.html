@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自定义奖品</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1>自定义奖品</h1>
+        </div>
+
+        <div class="input-group-glass">
+            <input type="text" id="new-reward" placeholder="奖品名称" style="flex: 2;">
+            <input type="number" id="new-reward-weight" placeholder="概率权重 (默认10)" value="10" min="1"
+                style="flex: 1; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 15px; margin-left: 10px;">
+            <button id="btn-add-reward" class="btn-gradient" style="margin-left: 10px;">添加</button>
+        </div>
+
+        <ul id="reward-pool-list" style="margin-top: 30px;">
+            <!-- Rewards will be loaded here -->
+        </ul>
+
+        <nav>
+            <a href="index.html">状态检查</a>
+            <a href="tasks.html">任务管理</a>
+            <a href="manage.html">管理问题</a>
+            <a href="lottery.html">抽奖</a>
+            <a href="customize_reward.html">自定义奖品</a>
+            <a href="login.html">登录</a>
+        </nav>
+    </div>
+
+    <script src="api.js"></script>
+    <script src="customize_reward.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务管理</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1>任务中心</h1>
+            <div class="coins-display">
+                <span class="coin-icon">🪙</span>
+                <span id="total-coins">0</span>
+            </div>
+        </div>
+
+        <!-- 标签页切换按钮 -->
+        <div class="tab-buttons">
+            <button class="tab-btn active" data-tab="view">任务查看</button>
+            <button class="tab-btn" data-tab="create">任务管理</button>
+        </div>
+
+        <!-- ===== 标签页1：任务查看 ===== -->
+        <div id="tab-view" class="tab-content">
+            <div class="filter-bar">
+                <button class="filter-btn active" data-filter="all">全部</button>
+                <button class="filter-btn" data-filter="学习">学习</button>
+                <button class="filter-btn" data-filter="家务">家务</button>
+                <button class="filter-btn" data-filter="生活">生活</button>
+                <button class="filter-btn" data-filter="心理调节">心理调节</button>
+                <button class="filter-btn" data-filter="总结">总结</button>
+            </div>
+            <ul id="task-list"></ul>
+        </div>
+
+        <!-- ===== 标签页2：任务管理（创建） ===== -->
+        <div id="tab-create" class="tab-content hidden">
+            <div class="task-form">
+                <h2>创建新任务</h2>
+
+                <label>任务内容</label>
+                <input type="text" id="task-content" placeholder="输入任务内容...">
+
+                <label>所属领域</label>
+                <div class="radio-group" id="category-group">
+                    <label class="radio-item">
+                        <input type="radio" name="category" value="学习" checked>
+                        <span>学习</span>
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="category" value="家务">
+                        <span>家务</span>
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="category" value="生活">
+                        <span>生活</span>
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="category" value="心理调节">
+                        <span>心理调节</span>
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="category" value="总结">
+                        <span>总结</span>
+                    </label>
+                </div>
+
+                <label>消耗精力</label>
+                <div class="radio-group" id="energy-group">
+                    <label class="radio-item energy-item">
+                        <input type="radio" name="energy" value="1" checked>
+                        <span>⚡</span>
+                    </label>
+                    <label class="radio-item energy-item">
+                        <input type="radio" name="energy" value="2">
+                        <span>⚡⚡</span>
+                    </label>
+                    <label class="radio-item energy-item">
+                        <input type="radio" name="energy" value="3">
+                        <span>⚡⚡⚡</span>
+                    </label>
+                </div>
+
+                <label>完成奖励金币</label>
+                <input type="number" id="task-coins" placeholder="输入金币数量" min="1" value="10">
+
+                <button id="btn-create" class="btn btn-primary">创建任务</button>
+            </div>
+        </div>
+
+        <!-- 导航 -->
+        <nav>
+            <a href="index.html">状态检查</a>
+            <a href="manage.html">管理问题</a>
+            <a href="lottery.html">抽奖</a>
+            <a href="customize_reward.html">自定义奖品</a>
+            <a href="login.html">登录</a>
+        </nav>
+    </div>
+
+    <script src="api.js"></script>
+    <script src="tasks.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADHD Helper - 抽奖</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 特殊页面样式 */
+        body {
+            /* 覆盖默认的 flex 居中布局，因为我们需要滚动长页面 */
+            display: block;
+            overflow-x: hidden;
+            background: #000;
+        }
+
+        /* 3D 容器 - 全屏 */
+        #hero-canvas {
+            position: fixed;
+            /* 固定在背景，创造视差效果或单纯作为背景 */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 1;
+            pointer-events: auto;
+            /* 允许鼠标交互 */
+        }
+
+        /* 内容层 - 在 Canvas 之上 */
+        #content-layer {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            pointer-events: none;
+            /* 让鼠标事件穿透到 Canvas，除非在具体内容上 */
+        }
+
+        /* 占位 Header - 透明，为了让金币显示 */
+        .hero-spacer {
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .hero-text {
+            color: #fff;
+            text-align: center;
+            text-transform: uppercase;
+            font-weight: 800;
+            font-size: 3rem;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+            opacity: 0.8;
+            user-select: none;
+        }
+
+        .scroll-indicator {
+            margin-top: 20px;
+            font-size: 1rem;
+            animation: bounce 2s infinite;
+        }
+
+        /* 实际抽奖内容区域 */
+        .lottery-section {
+            background: #000;
+            min-height: 100vh;
+            padding: 60px 20px;
+            pointer-events: auto;
+            /* 恢复交互 */
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes bounce {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(10px);
+            }
+
+            60% {
+                transform: translateY(5px);
+            }
+        }
+
+        /* 导航覆盖 */
+        nav {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+
+    <!-- Import Maps for Three.js & Cannon -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+            "cannon-es": "https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js"
+        }
+    }
+    </script>
+    <style>
+        /* === Loot Box Image Styles === */
+        .loot-box-stage {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 480px;
+            /* More space for the image */
+            perspective: 1000px;
+            margin-top: 20px;
+            overflow: visible;
+        }
+
+        .loot-box-container {
+            width: 300px;
+            /* Larger */
+            height: 300px;
+            position: relative;
+        }
+
+        /* Glow Effect */
+        .glow-effect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.4) 0%, rgba(0, 0, 0, 0) 70%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* The Box Wrapper */
+        .loot-box {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loot-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+            transition: transform 0.2s;
+        }
+
+        .loot-box:hover img {
+            transform: scale(1.05);
+            /* Gentle hover zoom */
+        }
+
+        .loot-box.idle {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Animations */
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        .loot-box.shake {
+            animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+        }
+
+        @keyframes shake {
+
+            10%,
+            90% {
+                transform: translate3d(-2px, 0, 0);
+            }
+
+            20%,
+            80% {
+                transform: translate3d(4px, 0, 0);
+            }
+
+            30%,
+            50%,
+            70% {
+                transform: translate3d(-8px, 0, 0);
+            }
+
+            40%,
+            60% {
+                transform: translate3d(8px, 0, 0);
+            }
+        }
+
+        /* Open State */
+        .loot-box.open .box-lid {
+            transform: rotateX(120deg);
+        }
+
+        /* Light Burst from inside */
+        .light-burst {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            transform-style: preserve-3d;
+            transform: translate3d(-50%, -50%, 0);
+            pointer-events: none;
+        }
+
+        .loot-box.open .light-burst {
+            animation: burstRise 1.5s ease-out forwards;
+        }
+
+        @keyframes burstRise {
+            0% {
+                transform: translate3d(-50%, 0, 0) scale(0);
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: translate3d(-50%, -150px, 0) scale(5);
+                opacity: 0;
+            }
+        }
+
+        .light-beam {
+            position: absolute;
+            width: 20px;
+            height: 100px;
+            background: linear-gradient(to top, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.8));
+            transform-origin: bottom center;
+        }
+
+        /* Stars/Sparkles Container */
+        .stars {
+            position: absolute;
+            top: -20%;
+            left: -20%;
+            width: 140%;
+            height: 140%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .star {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: white;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            animation: sparkle 2s infinite ease-in-out;
+            opacity: 0;
+        }
+
+        .s1 {
+            top: 30%;
+            left: 40%;
+            animation-delay: 0s;
+        }
+
+        .s2 {
+            top: 20%;
+            left: 60%;
+            animation-delay: 0.4s;
+        }
+
+        .s3 {
+            top: 40%;
+            left: 30%;
+            animation-delay: 0.8s;
+        }
+
+        .s4 {
+            top: 60%;
+            left: 70%;
+            animation-delay: 1.2s;
+        }
+
+        .s5 {
+            top: 10%;
+            left: 50%;
+            animation-delay: 0.2s;
+        }
+
+        .s6 {
+            top: 50%;
+            left: 80%;
+            animation-delay: 0.6s;
+        }
+
+        @keyframes sparkle {
+            0% {
+                opacity: 0;
+                transform: scale(0.5) rotate(0deg);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.2) rotate(45deg);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(0.5) rotate(90deg);
+            }
+        }
+
+        /* === Controls === */
+        .control-panel {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .draw-btn {
+            position: relative;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 15px 25px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 120px;
+        }
+
+        .draw-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .draw-btn:active {
+            transform: translateY(0);
+        }
+
+        .draw-btn .cost {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fbbf24;
+            margin-bottom: 4px;
+        }
+
+        .draw-btn .label {
+            font-size: 0.9rem;
+            color: #d1d5db;
+        }
+
+        .tag {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #ef4444;
+            color: white;
+            font-weight: bold;
+        }
+
+        .draw-btn.featured .tag {
+            background: #3b82f6;
+        }
+
+        .draw-btn.best-value .tag {
+            background: #10b981;
+        }
+
+        .draw-btn.best-value {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        /* === Modal === */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .modal-content {
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            text-align: center;
+            max-width: 900px;
+            /* Much larger */
+            width: 90%;
+            border: none;
+            /* No border */
+            box-shadow: none;
+            /* No shadow */
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-content h2 {
+            color: white;
+            margin-top: 0;
+        }
+
+        /* Styles moved to style.css */
+
+        .btn-close {
+            background: #7c3aed;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-close:hover {
+            background: #6d28d9;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 3D Canvas Container -->
+    <div id="hero-canvas"></div>
+
+    <div id="content-layer">
+        <!-- 第一屏：完全透明，只显示文字指引 -->
+        <div class="hero-spacer">
+            <h1 class="hero-text">LOTTERY<br><span style="font-size: 1.5rem; font-weight: 400">Interact with the
+                    Gold</span></h1>
+            <div class="hero-text scroll-indicator">↓ SCROLL TO PLAY ↓</div>
+        </div>
+
+        <!-- 第二屏：抽奖界面 -->
+        <div class="lottery-section">
+            <div class="container" style="background: transparent; padding-top: 0;">
+                <div class="page-header">
+                    <h1>抽奖中心</h1>
+                    <div class="coins-display">
+                        <span class="coin-icon">🪙</span>
+                        <span id="total-coins">0</span>
+                    </div>
+                </div>
+
+                <!-- Blind Box Area -->
+                <div class="loot-box-stage">
+                    <div class="loot-box-container">
+                        <div class="glow-effect"></div>
+                        <div id="loot-box" class="loot-box idle">
+                            <img id="loot-box-img" src="assets/loot_box_closed.png" alt="Loot Box"
+                                style="width: 100%; height: auto; display: block;">
+                            <div class="stars">
+                                <div class="star s1"></div>
+                                <div class="star s2"></div>
+                                <div class="star s3"></div>
+                                <div class="star s4"></div>
+                                <div class="star s5"></div>
+                                <div class="star s6"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="control-panel">
+                    <button class="draw-btn" onclick="lotteryGame.draw(1, 1, 25)">
+                        <span class="cost">25 🪙</span>
+                        <span class="label">单抽 (x1)</span>
+                    </button>
+                    <button class="draw-btn featured" onclick="lotteryGame.draw(3, 2, 50)">
+                        <span class="tag">划算</span>
+                        <span class="cost">50 🪙</span>
+                        <span class="label">三连抽 (选2)</span>
+                    </button>
+                    <button class="draw-btn best-value" onclick="lotteryGame.draw(9, 3, 75)">
+                        <span class="tag">超值</span>
+                        <span class="cost">75 🪙</span>
+                        <span class="label">九连抽 (选3)</span>
+                    </button>
+                </div>
+
+                <!-- Reward Modal -->
+                <div id="reward-modal" class="modal hidden">
+                    <div class="modal-content">
+                        <h2>🎉 恭喜获得 🎉</h2>
+                        <p id="modal-instruction" style="color: #aaa; margin-bottom: 15px;"></p>
+                        <div id="reward-list" class="reward-grid"></div>
+                        <button id="btn-confirm-reward" class="btn-close"
+                            onclick="lotteryGame.confirmSelection()">收下奖励</button>
+                    </div>
+                </div>
+
+                <!-- History Modal -->
+                <div id="history-modal" class="modal hidden">
+                    <div class="modal-content" style="max-width: 500px;">
+                        <h2>📦 奖品记录</h2>
+                        <div id="history-list" class="history-list"
+                            style="max-height: 60vh; overflow-y: auto; text-align: left;"></div>
+                        <div style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
+                            <button class="btn-close" onclick="lotteryGame.closeHistoryModal()">关闭</button>
+                            <button class="btn-close" style="background: #ef4444;"
+                                onclick="lotteryGame.clearHistory()">清空</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Single Reward Detail Modal -->
+                <div id="reward-detail-modal" class="modal hidden" style="z-index: 1200;">
+                    <div class="modal-content"
+                        style="background: transparent; box-shadow: none; border: none; max-width: 400px;">
+                        <h2 style="margin-bottom: 30px; text-shadow: 0 0 10px rgba(0,0,0,0.5);">🎁 奖品详情</h2>
+                        <div id="detail-card-container"
+                            style="display: flex; justify-content: center; margin-bottom: 40px;">
+                            <!-- Card injected here -->
+                        </div>
+                        <div style="display: flex; gap: 20px; justify-content: center;">
+                            <button id="btn-use-reward" class="btn-close" style="background: #10b981;">✨ 使用</button>
+                            <button id="btn-delete-reward" class="btn-close" style="background: #ef4444;">🗑️
+                                删除</button>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <button class="btn-close"
+                                style="background: transparent; border: 1px solid rgba(255,255,255,0.3); padding: 10px 30px; font-size: 0.9rem;"
+                                onclick="lotteryGame.closeDetailModal()">返回</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="index.html">状态检查</a>
+        <a href="manage.html">管理问题</a>
+        <a href="tasks.html">任务管理</a>
+        <a href="javascript:void(0)" onclick="lotteryGame.showHistory()">奖品查看</a>
+        <a href="customize_reward.html">自定义奖品</a>
+        <a href="login.html">登录</a>
+    </nav>
+
+    <script src="api.js"></script>
+    <script type="module" src="lottery_3d.js"></script>
+    <script src="lottery_logic.js"></script>
+</body>
+
+</html>
